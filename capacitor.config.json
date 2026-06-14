@@ -1,8 +1,0 @@
-{
-  "appId": "com.quizmaster.app",
-  "appName": "QuizMaster",
-  "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
-}
