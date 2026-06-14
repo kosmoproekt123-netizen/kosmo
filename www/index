@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>QuizMaster | Офлайн-платформа тестов</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #1a2a32;
+            margin: 0;
+            padding: 16px;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        body.light {
+            background: #eef2f5;
+            color: #1a2a3a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f212e, #1a3a4a);
+            border-radius: 28px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        body.light .header {
+            background: linear-gradient(135deg, #d4e0e8, #c0d0dc);
+            color: #1a2a3a;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+
+        body.light .badge {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .test-card {
+            background: #fefcf5;
+            border-radius: 20px;
+            padding: 18px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        body.light .test-card {
+            background: white;
+        }
+
+        .test-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .test-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .test-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 8px 0 4px;
+        }
+
+        .test-desc {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .test-stats {
+            font-size: 0.75rem;
+            color: #2c5a7a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .delete-test {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            color: #e67e5e;
+        }
+
+        .delete-test:hover {
+            background: #ffe0d8;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #2c5a7a;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+
+        .btn-primary { background: #2c6e5c; }
+        .btn-secondary { background: #5f4c3c; }
+        .btn-danger { background: #b13b2d; }
+        .btn-theme { background: #8b5cf6; }
+        .btn-quantity { background: #e0a800; color: #1a2a3a; }
+
+        .test-mode {
+            display: none;
+            background: #fefcf5;
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        body.light .test-mode {
+            background: white;
+        }
+
+        .back-btn {
+            background: #5f4c3c;
+            margin-bottom: 16px;
+        }
+
+        .question-card {
+            border-left: 8px solid;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            border-radius: 16px;
+        }
+
+        body.light .question-card {
+            background: #fefefe;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #e8edf2;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        .option:hover { background: #d0dce8; }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: #eef2f5;
+        }
+
+        .level-tag {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #e0e0e0;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .result-panel {
+            background: #eef2fa;
+            border-radius: 20px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .quantity-selector {
+            background: #eef2fa;
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .quantity-selector label {
+            font-weight: bold;
+        }
+
+        .quantity-selector select {
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid #ccc;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .tests-grid { grid-template-columns: 1fr; }
+            .options { flex-direction: column; }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #888;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1000;
+            animation: fadeOut 2s ease;
+        }
+        .question-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
+            margin: 12px 0;
+            display: block;
+            object-fit: contain;
+            background: #eef2f5;
+            padding: 8px;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📚 QuizMaster <span style="font-size:0.9rem;">офлайн-платформа</span></h1>
+        <p>📊 Всего пройдено: <span id="totalAttemptsSpan">0</span> тестов | ✅ Правильных ответов: <span id="totalCorrectSpan">0</span></p>
+        <div class="stats-row">
+            <div class="badge" id="testsCountBadge">📦 Тестов: 0</div>
+            <div class="badge">💾 Работает офлайн</div>
+            <div class="badge">📁 Формат .qt</div>
+        </div>
+    </div>
+
+    <div id="testsList" class="tests-grid">
+        <div class="empty-state">✨ Нет установленных тестов.<br>Нажмите «➕ Добавить тест»</div>
+    </div>
+
+    <div class="action-bar">
+        <button id="addTestBtn" class="btn-primary">➕ Добавить тест (.qt)</button>
+        <button id="backupBtn" class="btn-secondary">💾 Экспорт статистики</button>
+        <button id="restoreBtn" class="btn-secondary">📂 Импорт статистики</button>
+        <button id="themeBtn" class="btn-theme">🌓 Тема</button>
+        <button id="pdfPrintBtn" class="btn-danger" style="background:#b13b2d; display:none;">🖨️ ПЕЧАТЬ PDF</button>
+        <button id="aiActivateBtn" style="background:#8b5cf6; display:none;">🤖 Активировать AI</button>
+    </div>
+
+    <div id="testMode" class="test-mode">
+        <button id="backToListBtn" class="back-btn">← К списку тестов</button>
+        <div id="testHeader"></div>
+        
+        <!-- ВЫБОР КОЛИЧЕСТВА ВОПРОСОВ -->
+        <div id="quantitySelector" class="quantity-selector">
+            <label>📊 Количество вопросов в тесте:</label>
+            <select id="questionsCountSelect">
+                <option value="5">5 вопросов</option>
+                <option value="10" selected>10 вопросов</option>
+                <option value="15">15 вопросов</option>
+                <option value="20">20 вопросов</option>
+                <option value="25">25 вопросов</option>
+                <option value="30">30 вопросов</option>
+                <option value="50">50 вопросов</option>
+                <option value="all">❓ ВСЕ вопросы</option>
+            </select>
+            <button id="applyQuantityBtn" class="btn-quantity">🔄 Применить и начать заново</button>
+        </div>
+        
+        <div id="questionsContainer"></div>
+        <div class="action-bar" style="justify-content: center;">
+            <button id="checkTestBtn">✅ ПРОВЕРИТЬ</button>
+        </div>
+        <div id="testResultPanel" class="result-panel"></div>
+    </div>
+</div>
+
+<script>
+    // ============== ОСНОВНОЕ ЯДРО ==============
+    
+    const STORAGE_KEYS = {
+        INSTALLED_TESTS: 'qt_installed_tests',
+        TEST_STATS: 'qt_test_stats_'
+    };
+    const RATING_KEY = 'qt_question_rating_';
+    const DEFAULT_RATING = 500;
+    const RATING_DELTA = 50;
+    let currentTest = null;           // Полный тест (все вопросы)
+    let currentQuestionsSubset = [];  // Выбранные вопросы (подмножество)
+    let currentAnswers = [];
+    let currentFeedback = [];
+    let currentQuestionsCount = 10;    // Количество вопросов по умолчанию
+        // ============== AI СИСТЕМА ==============
+    let aiSystem = {
+        isActive: false,           // Включен ли AI режим
+        currentTestContext: null,  // Хранит весь текущий тест (вопросы + ответы пользователя)
+        conversationHistory: [],   // История диалогов с AI
+        initialized: false         // Был ли AI активирован для текущего теста
+    };
+    
+    // Функция для инициализации AI контекста при открытии теста
+    function initAIContext(test) {
+        aiSystem.currentTestContext = {
+            testId: test.meta.id,
+            testName: test.meta.name,
+            questions: test.questions.map((q, idx) => ({
+                index: idx,
+                text: q.text,
+                options: q.options,
+                correct: q.correct,
+                level: q.level,
+                userAnswer: null,        // Будет заполняться по мере ответов
+                userAnswerCorrect: null   // Правильно/неправильно
+            })),
+            totalQuestions: test.questions.length,
+            startedAt: new Date().toISOString()
+        };
+        aiSystem.conversationHistory = [];
+        aiSystem.initialized = true;
+        aiSystem.isActive = true;
+        
+        console.log('✅ AI контекст инициализирован для теста:', test.meta.name);
+    }
+    
+    // Функция для обновления ответа пользователя в AI контексте
+    function updateAIUserAnswer(questionIndex, selectedOption, isCorrect) {
+        if (!aiSystem.isActive || !aiSystem.currentTestContext) return;
+        
+        if (aiSystem.currentTestContext.questions[questionIndex]) {
+            aiSystem.currentTestContext.questions[questionIndex].userAnswer = selectedOption;
+            aiSystem.currentTestContext.questions[questionIndex].userAnswerCorrect = isCorrect;
+        }
+    }
+    
+    // Функция для запроса к AI (пока заглушка, потом подключим DeepSeek)
+        async function askAIAboutQuestion(questionIndex, userQuestion) {
+        if (!aiSystem.isActive || !aiSystem.currentTestContext) {
+            alert('🤖 AI режим не активирован. Нажмите кнопку "🤖 Активировать AI" в панели инструментов.');
+            return null;
+        }
+        
+        const question = aiSystem.currentTestContext.questions[questionIndex];
+        if (!question) return null;
+        
+        showToast('🤔 AI думает...');
+        
+        // Получаем учебный материал из теста (если есть)
+        let studyMaterialText = '';
+        if (currentTest.study_material) {
+            if (currentTest.study_material.text) {
+                studyMaterialText = currentTest.study_material.text;
+            } else if (currentTest.study_material.content) {
+                studyMaterialText = currentTest.study_material.content;
+            }
+        }
+        
+        // Формируем промпт для AI
+        const prompt = `
+Ты — эксперт-помощник для образовательной платформы QuizMaster.
+
+## Вопрос теста, по которому обратился пользователь:
+"${question.text}"
+
+Правильный ответ на вопрос: вариант ${String.fromCharCode(65+question.correct)}: "${question.options[question.correct]}"
+
+## Учебные материалы по теме (используй их как ОСНОВНОЙ источник):
+${studyMaterialText || "Материалы не предоставлены. Используй свои знания."}
+
+## Вопрос пользователя:
+"${userQuestion}"
+
+## Инструкции:
+1. Сначала ответь, используя учебные материалы (если они есть)
+2. Если в материалах нет ответа, используй свои знания
+3. Ответ должен быть полезным, понятным и подробным
+4. Используй markdown для форматирования (**жирный**, *курсив*, списки)
+5. Если объясняешь правильный ответ — объясни ПОЧЕМУ он правильный
+6. Не выдумывай факты — если не знаешь, так и скажи
+
+Ответ:
+`;
+        
+        try {
+            // ВРЕМЕННО: пока нет API ключа, используем заглушку
+            // Но уже с правильной структурой для DeepSeek
+            if (!window.DEEPSEEK_API_KEY) {
+                // Заглушка с учетом материалов
+                let materialHint = '';
+                if (studyMaterialText) {
+                    materialHint = `\n\n📖 **Из учебных материалов:** ${studyMaterialText.substring(0, 200)}...`;
+                }
+                return `📚 **Вопрос:** ${question.text}\n\n✅ **Правильный ответ:** ${String.fromCharCode(65+question.correct)}. ${question.options[question.correct]}\n\n💡 **Ответ на ваш вопрос:** "${userQuestion || 'Расскажи подробнее'}"\n\n*ℹ️ Это заглушка. Для получения реальных ответов от DeepSeek получи API ключ и раскомментируй код в функции askAIAboutQuestion*${materialHint}`;
+            }
+            
+            // РЕАЛЬНЫЙ ВЫЗОВ DEEPSEEK (будет работать после получения API ключа)
+            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${window.DEEPSEEK_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'Ты полезный образовательный ассистент. Отвечаешь на русском языке, подробно и понятно.'
+                        },
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
+            
+            const data = await response.json();
+            if (data.choices && data.choices[0]) {
+                return data.choices[0].message.content;
+            } else {
+                return `❌ Ошибка API: ${data.error?.message || 'Неизвестная ошибка'}`;
+            }
+            
+        } catch (error) {
+            console.error('DeepSeek API Error:', error);
+            return `❌ Ошибка подключения к DeepSeek: ${error.message}\n\n💡 Проверь:\n1. Интернет-соединение\n2. API ключ (нужно установить)`;
+        }
+    }
+    
+    
+    // Сброс AI контекста при закрытии теста
+    function resetAIContext() {
+        aiSystem = {
+            isActive: false,
+            currentTestContext: null,
+            conversationHistory: [],
+            initialized: false
+        };
+        console.log('🔄 AI контекст сброшен');
+    }
+        function getQuestionRating(testId, questionIndex) {
+        const key = RATING_KEY + testId;
+        const data = localStorage.getItem(key);
+        const ratings = data ? JSON.parse(data) : {};
+        return ratings[questionIndex] !== undefined ? ratings[questionIndex] : DEFAULT_RATING;
+    }
+    
+    function saveQuestionRating(testId, questionIndex, rating) {
+        const key = RATING_KEY + testId;
+        const data = localStorage.getItem(key);
+        const ratings = data ? JSON.parse(data) : {};
+        ratings[questionIndex] = rating;
+        localStorage.setItem(key, JSON.stringify(ratings));
+    }
+    
+    function updateQuestionRating(testId, questionIndex, isCorrect) {
+        let currentRating = getQuestionRating(testId, questionIndex);
+        let newRating = isCorrect ? Math.max(0, currentRating - RATING_DELTA) : Math.min(1000, currentRating + RATING_DELTA);
+        saveQuestionRating(testId, questionIndex, newRating);
+        return newRating;
+    }
+
+    function getInstalledTests() {
+        const tests = localStorage.getItem(STORAGE_KEYS.INSTALLED_TESTS);
+        return tests ? JSON.parse(tests) : [];
+    }
+    
+    function saveInstalledTests(tests) {
+        localStorage.setItem(STORAGE_KEYS.INSTALLED_TESTS, JSON.stringify(tests));
+    }
+    
+    function getTestStats(testId) {
+        const stats = localStorage.getItem(STORAGE_KEYS.TEST_STATS + testId);
+        return stats ? JSON.parse(stats) : {
+            attempts: 0,
+            totalCorrect: 0,
+            totalAnswered: 0,
+            bestScore: 0,
+            questionStats: {}
+        };
+    }
+    
+    function saveTestStats(testId, stats) {
+        localStorage.setItem(STORAGE_KEYS.TEST_STATS + testId, JSON.stringify(stats));
+        updateGlobalStats();
+    }
+    
+    function updateGlobalStats() {
+        const installed = getInstalledTests();
+        let totalAttempts = 0;
+        let totalAllCorrect = 0;
+        
+        installed.forEach(testId => {
+            const stats = getTestStats(testId);
+            totalAttempts += stats.attempts;
+            totalAllCorrect += stats.totalCorrect;
+        });
+        
+        document.getElementById('totalAttemptsSpan').innerText = totalAttempts;
+        document.getElementById('totalCorrectSpan').innerText = totalAllCorrect;
+        document.getElementById('testsCountBadge').innerHTML = `📦 Тестов: ${installed.length}`;
+    }
+    
+    // Перемешивание массива (алгоритм Фишера-Йетса)
+    function shuffleArray(arr) {
+        const shuffled = [...arr];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+    
+    // Выбрать подмножество вопросов
+    function selectQuestionsSubset(fullQuestions, count) {
+        const testId = currentTest ? currentTest.meta.id : null;
+        if (!testId) {
+            const shuffled = shuffleArray(fullQuestions);
+            if (count === 'all' || count >= fullQuestions.length) {
+                return shuffled;
+            }
+            return shuffled.slice(0, parseInt(count));
+        }
+        
+        const questionsWithRating = fullQuestions.map((q, idx) => ({
+            q: q,
+            originalIndex: idx,
+            rating: getQuestionRating(testId, idx)
+        }));
+        
+        questionsWithRating.sort((a, b) => a.rating - b.rating);
+        
+        const sortedQuestions = questionsWithRating.map(item => item.q);
+        
+        if (count === 'all' || count >= fullQuestions.length) {
+            return sortedQuestions;
+        }
+        return sortedQuestions.slice(0, parseInt(count));
+    }
+    // Обновить текущий набор вопросов
+    function refreshQuestionsSubset() {
+        if (!currentTest) return;
+        
+        const select = document.getElementById('questionsCountSelect');
+        let count = select.value;
+        
+        currentQuestionsCount = count;
+        currentQuestionsSubset = selectQuestionsSubset(currentTest.questions, count);
+        currentAnswers = new Array(currentQuestionsSubset.length).fill(null);
+        currentFeedback = new Array(currentQuestionsSubset.length).fill('');
+        
+        renderTestQuestions();
+        
+        // Обновляем заголовок с информацией
+        const headerDiv = document.getElementById('testHeader');
+        if (headerDiv) {
+            headerDiv.innerHTML = `
+                <h2>${currentTest.meta.icon || '📋'} ${escapeHtml(currentTest.meta.name)}</h2>
+                <p>${escapeHtml(currentTest.meta.description || '')} • Всего вопросов в базе: ${currentTest.questions.length} • Выбрано: ${currentQuestionsSubset.length}</p>
+            `;
+        }
+        document.getElementById('testResultPanel').innerHTML = '';
+    }
+    
+    function installTest(testModule) {
+        if (!testModule.meta || !testModule.meta.id) {
+            alert('❌ Неверный формат теста. Нет meta.id');
+            return false;
+        }
+        
+        const installed = getInstalledTests();
+        const testId = testModule.meta.id;
+        
+        if (!installed.includes(testId)) {
+            installed.push(testId);
+            saveInstalledTests(installed);
+        }
+        
+        localStorage.setItem(`qt_test_${testId}`, JSON.stringify(testModule));
+        
+        showToast(`✅ Тест "${testModule.meta.name}" установлен!`);
+        renderTestsList();
+        return true;
+    }
+    
+    function uninstallTest(testId) {
+        if (confirm('Удалить тест? Статистика останется в архиве и восстановится при повторной установке.')) {
+            let installed = getInstalledTests();
+            installed = installed.filter(id => id !== testId);
+            saveInstalledTests(installed);
+            localStorage.removeItem(`qt_test_${testId}`);
+            showToast(`🗑️ Тест удалён. Статистика сохранена.`);
+            renderTestsList();
+            if (currentTest && currentTest.meta.id === testId) {
+                exitTestMode();
+            }
+        }
+    }
+    
+    function loadTestById(testId) {
+        const testData = localStorage.getItem(`qt_test_${testId}`);
+        return testData ? JSON.parse(testData) : null;
+    }
+    
+    function saveTestResult(testModule, userAnswers, questionSubsetIndices) {
+        const testId = testModule.meta.id;
+        const stats = getTestStats(testId);
+        
+        let correctCount = 0;
+        userAnswers.forEach((answer, idx) => {
+            const originalQIndex = questionSubsetIndices[idx];
+            const isCorrect = (answer !== null && answer === testModule.questions[originalQIndex].correct);
+            if (isCorrect) correctCount++;
+            
+            if (!stats.questionStats[originalQIndex]) stats.questionStats[originalQIndex] = { correct: 0, wrong: 0 };
+            if (isCorrect) stats.questionStats[originalQIndex].correct++;
+            else if (answer !== null) stats.questionStats[originalQIndex].wrong++;
+        });
+        
+        stats.attempts++;
+        stats.totalAnswered += userAnswers.filter(a => a !== null).length;
+        stats.totalCorrect += correctCount;
+        stats.bestScore = Math.max(stats.bestScore, correctCount);
+        
+        saveTestStats(testId, stats);
+        return { correctCount, total: userAnswers.length };
+    }
+    
+    function getStatsDisplay(testId) {
+        const stats = getTestStats(testId);
+        return {
+            attempts: stats.attempts,
+            bestScore: stats.bestScore,
+            accuracy: stats.totalAnswered > 0 ? Math.round((stats.totalCorrect / stats.totalAnswered) * 100) : 0
+        };
+    }
+    
+    function renderTestsList() {
+        const container = document.getElementById('testsList');
+        const installed = getInstalledTests();
+        
+        if (installed.length === 0) {
+            container.innerHTML = '<div class="empty-state">✨ Нет установленных тестов.<br>Нажмите «➕ Добавить тест»</div>';
+            return;
+        }
+        
+        let html = '';
+        installed.forEach(testId => {
+            const test = loadTestById(testId);
+            if (!test) return;
+            
+            const stats = getStatsDisplay(testId);
+            html += `
+                <div class="test-card" data-id="${testId}">
+                    <div class="test-icon">${test.meta.icon || '📋'}</div>
+                    <div class="test-name">${escapeHtml(test.meta.name)}</div>
+                    <div class="test-desc">${escapeHtml(test.meta.description || 'Нет описания')}</div>
+                    <div class="test-stats">
+                        <span>📊 ${stats.accuracy}% точности</span>
+                        <span>🏆 Лучший: ${stats.bestScore}</span>
+                        <span>🎮 Попыток: ${stats.attempts}</span>
+                        <span>📚 Вопросов: ${test.questions.length}</span>
+                        <button class="delete-test" data-id="${testId}" data-action="delete">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+        document.querySelectorAll('.test-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-test')) return;
+                const testId = card.dataset.id;
+                startTest(testId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-test').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const testId = btn.dataset.id;
+                uninstallTest(testId);
+            });
+        });
+    }
+    
+    function startTest(testId) {
+        const test = loadTestById(testId);
+        if (!test) {
+            alert('Ошибка загрузки теста');
+            return;
+        }
+        
+        currentTest = test;
+        
+        // Выбираем вопросы согласно текущему значению
+        const select = document.getElementById('questionsCountSelect');
+        const count = select.value;
+        currentQuestionsSubset = selectQuestionsSubset(currentTest.questions, count);
+        currentAnswers = new Array(currentQuestionsSubset.length).fill(null);
+        currentFeedback = new Array(currentQuestionsSubset.length).fill('');
+        
+        document.getElementById('testsList').style.display = 'none';
+        document.getElementById('testMode').style.display = 'block';
+        
+        renderTestQuestions();
+        
+        document.getElementById('testHeader').innerHTML = `
+            <h2>${test.meta.icon || '📋'} ${escapeHtml(test.meta.name)}</h2>
+            <p>${escapeHtml(test.meta.description || '')} • Всего вопросов в базе: ${test.questions.length} • Выбрано: ${currentQuestionsSubset.length}</p>
+        `;
+        document.getElementById('testResultPanel').innerHTML = '';
+                // Показать кнопку AI
+        const aiBtn = document.getElementById('aiActivateBtn');
+        if (aiBtn) aiBtn.style.display = 'inline-block';
+        
+        // Сбросить AI контекст для нового теста
+        resetAIContext();
+                const pdfBtn = document.getElementById('pdfPrintBtn');
+        if (pdfBtn) {
+            pdfBtn.style.display = 'inline-block';
+        }
+    }
+    
+    
+    function renderTestQuestions() {
+        if (!currentTest || !currentQuestionsSubset) return;
+        
+        const container = document.getElementById('questionsContainer');
+        const levelColors = {
+            1: '#3c9e4c', 2: '#e0a800', 3: '#d45a1a', 4: '#b13b2d'
+        };
+        const levelNames = { 1: '🟢 Лёгкий', 2: '🟡 Средний', 3: '🟠 Сложный', 4: '🔴 Очень сложный' };
+        
+        let html = '';
+        currentQuestionsSubset.forEach((q, idx) => {
+            const level = q.level || 1;
+            const selected = currentAnswers[idx];
+            html += `
+                <div class="question-card" style="border-left-color: ${levelColors[level] || '#888'}">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <strong>Вопрос ${idx+1}</strong>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <button class="ai-question-btn" data-idx="${idx}" style="background:#8b5cf6; border:none; color:white; padding:4px 12px; border-radius:20px; font-size:0.7rem; cursor:pointer;">✨ +AI</button>
+                            <span class="level-tag">${levelNames[level]}</span>
+                        </div>
+                    </div>
+                    <div style="margin: 12px 0;">${escapeHtml(q.text)}</div>
+            `;
+            
+            if (q.image_url && q.image_url.trim() !== '') {
+                html += `<img src="${escapeHtml(q.image_url)}" class="question-image" alt="Изображение к вопросу" onerror="this.style.display='none'">`;
+            }
+            
+            html += `<div class="options" id="opts_${idx}">`;
+            q.options.forEach((opt, optIdx) => {
+                const checked = (selected === optIdx) ? 'checked' : '';
+                html += `
+                    <label class="option">
+                        <input type="radio" name="q_${idx}" value="${optIdx}" ${checked}>
+                        <span>${String.fromCharCode(65+optIdx)}. ${escapeHtml(opt)}</span>
+                    </label>
+                `;
+            });
+            html += `</div><div class="feedback" id="fb_${idx}">${currentFeedback[idx] || ''}</div></div>`;
+        });
+        
+        container.innerHTML = html;
+        
+        currentQuestionsSubset.forEach((_, idx) => {
+            const radios = document.querySelectorAll(`input[name="q_${idx}"]`);
+            radios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    currentAnswers[idx] = parseInt(e.target.value);
+                });
+            });
+        });
+                // Добавляем обработчики для AI кнопок вопросов
+        document.querySelectorAll('.ai-question-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const questionIdx = parseInt(btn.dataset.idx);
+                
+                if (!aiSystem.isActive || !aiSystem.currentTestContext) {
+                    const confirmActivate = confirm('🤖 AI режим не активирован! Хотите активировать AI для этого теста?');
+                    if (confirmActivate && currentTest) {
+                        initAIContext(currentTest);
+                        document.getElementById('aiActivateBtn').style.background = '#6c4a8f';
+                        document.getElementById('aiActivateBtn').innerHTML = '✅ AI активен';
+                        showToast('🤖 AI активирован! Теперь можно задавать вопросы.');
+                    } else {
+                        showToast('❌ Сначала активируй AI кнопкой в панели инструментов');
+                        return;
+                    }
+                }
+                
+                // Показываем диалог для вопроса к AI
+                showAIDialog(questionIdx);
+            });
+        });
+    }
+    
+    function checkTest() {
+        if (!currentTest || !currentQuestionsSubset) return;
+        
+        let correctCount = 0;
+        
+        // Находим оригинальные индексы вопросов
+        const originalIndices = currentQuestionsSubset.map(q => currentTest.questions.findIndex(origQ => origQ === q));
+        
+        currentQuestionsSubset.forEach((q, idx) => {
+            const isCorrect = (currentAnswers[idx] === q.correct);
+            if (isCorrect) correctCount++;
+            
+            updateQuestionRating(currentTest.meta.id, originalIndices[idx], isCorrect);
+
+            if (currentAnswers[idx] === null) {
+                currentFeedback[idx] = `⚠️ Не выбрано. Правильный: ${String.fromCharCode(65+q.correct)}. ${q.options[q.correct]}`;
+            } else if (isCorrect) {
+                currentFeedback[idx] = `✅ Верно!`;
+            } else {
+                currentFeedback[idx] = `❌ Ошибка. Правильный: ${String.fromCharCode(65+q.correct)}. ${q.options[q.correct]}`;
+            }
+        });
+                 // Обновляем AI контекст с ответом пользователя
+            if (aiSystem.isActive && aiSystem.currentTestContext) {
+                updateAIUserAnswer(originalIndices[idx], currentAnswers[idx], isCorrect);
+            }
+        
+        const result = saveTestResult(currentTest, currentAnswers, originalIndices);
+        
+        renderTestQuestions();
+        
+        document.getElementById('testResultPanel').innerHTML = `
+            🎯 Результат: ${result.correctCount} из ${result.total} верно (${Math.round(result.correctCount/result.total*100)}%)
+            <br>📊 Статистика по тесту обновлена!
+        `;
+        
+        updateGlobalStats();
+        renderTestsList();
+    }
+    
+    function exitTestMode() {
+        document.getElementById('testsList').style.display = 'grid';
+        document.getElementById('testMode').style.display = 'none';
+                // Скрыть кнопку AI
+        const aiBtn = document.getElementById('aiActivateBtn');
+        if (aiBtn) aiBtn.style.display = 'none';
+        
+        // Сбросить AI контекст
+        resetAIContext();
+        currentTest = null;
+        currentQuestionsSubset = [];
+        currentAnswers = [];
+        currentFeedback = [];
+        renderTestsList();
+        const pdfBtn = document.getElementById('pdfPrintBtn');
+        if (pdfBtn) {
+            pdfBtn.style.display = 'none';
+        }
+    }
+    
+    function addTestFromFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.qt, .json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const testModule = JSON.parse(event.target.result);
+                    if (!testModule.meta || !testModule.questions) {
+                        throw new Error('Неверный формат: нужны meta и questions');
+                    }
+                    installTest(testModule);
+                } catch(err) {
+                    alert('Ошибка чтения файла: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    
+    function exportStats() {
+        const allData = {};
+        const installed = getInstalledTests();
+        
+        installed.forEach(testId => {
+            allData[testId] = getTestStats(testId);
+        });
+        
+        const dataStr = JSON.stringify(allData, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `quiz_backup_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('💾 Статистика экспортирована');
+    }
+    
+    function importStats() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    Object.keys(imported).forEach(testId => {
+                        saveTestStats(testId, imported[testId]);
+                    });
+                    showToast('📂 Статистика восстановлена!');
+                    renderTestsList();
+                    updateGlobalStats();
+                } catch(err) {
+                    alert('Ошибка импорта: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    
+    function applyQuantityChange() {
+        if (!currentTest) return;
+        refreshQuestionsSubset();
+    }
+    
+    function toggleTheme() {
+        document.body.classList.toggle('light');
+    }
+    function printToPDF() {
+        if (!currentTest || !currentQuestionsSubset || currentQuestionsSubset.length === 0) {
+            showToast("❌ Сначала выберите тест!");
+            return;
+        }
+        
+        let printHtml = `<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${escapeHtml(currentTest.meta.name)} - Тест</title>
+            <style>
+                body { font-family: 'Times New Roman', Times, serif; margin: 2cm; font-size: 11pt; line-height: 1.3; }
+                h1 { font-size: 18pt; text-align: center; margin-bottom: 5px; }
+                .header-info { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #000; padding-bottom: 10px; }
+                .question { margin-bottom: 20px; page-break-inside: avoid; }
+                .question-number { font-weight: bold; margin-bottom: 3px; }
+                .question-text { font-weight: bold; margin-bottom: 8px; }
+                .options { margin-left: 20px; }
+                .option { margin: 4px 0; }
+                hr { margin: 15px 0; }
+                .footer { margin-top: 30px; font-size: 10pt; text-align: center; }
+                .question-image-pdf { max-width: 300px; max-height: 150px; margin: 8px 0; }
+                @media print { body { margin: 1.5cm; } }
+            </style>
+        </head>
+        <body>
+            <h1>${escapeHtml(currentTest.meta.name)}</h1>
+            <div class="header-info">
+                ${escapeHtml(currentTest.meta.description || '')}<br>
+                Всего вопросов: ${currentQuestionsSubset.length}
+            </div>
+            <hr>`;
+        
+        currentQuestionsSubset.forEach((q, idx) => {
+            printHtml += `
+            <div class="question">
+                <div class="question-number">${idx + 1}.</div>
+                <div class="question-text">${escapeHtml(q.text)}</div>`;
+            
+            if (q.image_url && q.image_url.trim() !== '') {
+                printHtml += `<img src="${escapeHtml(q.image_url)}" class="question-image-pdf" onerror="this.style.display='none'">`;
+            }
+            
+            printHtml += `<div class="options">`;
+            q.options.forEach((opt, optIdx) => {
+                const letter = String.fromCharCode(65 + optIdx);
+                printHtml += `<div class="option">□ ${letter}. ${escapeHtml(opt)}</div>`;
+            });
+            printHtml += `</div></div>`;
+        });
+        
+        printHtml += `
+            <hr>
+            <div class="footer">
+                ${escapeHtml(currentTest.meta.name)} • Дата: ${new Date().toLocaleDateString()}
+            </div>
+        </body>
+        </html>`;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(printHtml);
+        printWindow.document.close();
+        printWindow.print();
+    }
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+        // Функция для показа диалога с AI по конкретному вопросу
+    function showAIDialog(questionIdx) {
+        const question = aiSystem.currentTestContext?.questions[questionIdx];
+        if (!question) {
+            alert('Ошибка: вопрос не найден');
+            return;
+        }
+        
+        // Создаем модальное окно
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: ${document.body.classList.contains('light') ? '#fff' : '#1a2a32'}; 
+                        border-radius: 24px; max-width: 600px; width: 90%; 
+                        max-height: 80vh; display: flex; flex-direction: column;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                <div style="padding: 16px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin:0;">🤖 AI Помощник</h3>
+                    <button id="closeAIModal" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div style="padding: 16px 20px; flex:1; overflow-y: auto; min-height: 200px;">
+                    <div style="background: #eef2fa; padding: 12px; border-radius: 16px; margin-bottom: 16px;">
+                        <strong>📖 Вопрос:</strong><br>
+                        ${escapeHtml(question.text)}
+                    </div>
+                    <div id="aiChatMessages" style="max-height: 300px; overflow-y: auto;">
+                        <div class="ai-message" style="background: #8b5cf6; color: white; padding: 10px; border-radius: 16px; margin-bottom: 12px;">
+                            💡 Я знаю ответ на этот вопрос! Спроси меня что угодно — объясни тему, дай подсказку, расскажи почему правильный ответ именно такой.
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 16px 20px; border-top: 1px solid #ddd; display: flex; gap: 12px;">
+                    <input type="text" id="aiQuestionInput" placeholder="Задай вопрос по этой теме..." 
+                           style="flex:1; padding: 12px; border-radius: 24px; border: 1px solid #ccc; background: ${document.body.classList.contains('light') ? '#fff' : '#2a3a4a'};">
+                    <button id="sendToAI" style="background:#8b5cf6; padding: 12px 24px;">📤 Спросить</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Обработчики для модального окна
+        const closeBtn = modal.querySelector('#closeAIModal');
+        const sendBtn = modal.querySelector('#sendToAI');
+        const input = modal.querySelector('#aiQuestionInput');
+        const chatArea = modal.querySelector('#aiChatMessages');
+        
+        closeBtn.onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+        
+        sendBtn.onclick = async () => {
+            const userQuestion = input.value.trim();
+            if (!userQuestion) {
+                showToast('Введи свой вопрос');
+                return;
+            }
+            
+            // Добавляем сообщение пользователя в чат
+            chatArea.innerHTML += `
+                <div style="text-align: right; margin: 8px 0;">
+                    <div style="background: #2c6e5c; color: white; display: inline-block; padding: 8px 12px; border-radius: 18px; max-width: 80%;">
+                        ${escapeHtml(userQuestion)}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Показываем индикатор загрузки
+            const loadingId = 'loading-' + Date.now();
+            chatArea.innerHTML += `<div id="${loadingId}" style="color: #888; margin: 8px 0;"><em>🤔 AI думает...</em></div>`;
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Запрашиваем AI
+            const response = await askAIAboutQuestion(questionIdx, userQuestion);
+            
+            // Убираем индикатор загрузки
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+            
+            // Добавляем ответ AI
+            chatArea.innerHTML += `
+                <div style="margin: 8px 0;">
+                    <div style="background: #eef2fa; padding: 10px 14px; border-radius: 18px; display: inline-block; max-width: 90%;">
+                        ${markdownToHtml(response || '')}
+                    </div>
+                </div>
+            `;
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Сохраняем в историю
+            aiSystem.conversationHistory.push({
+                questionIdx: questionIdx,
+                user: userQuestion,
+                assistant: response,
+                timestamp: new Date()
+            });
+        };
+        
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendBtn.click();
+        });
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    function markdownToHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/### (.*?)(\n|$)/g, '<h4>$1</h4>')
+            .replace(/## (.*?)(\n|$)/g, '<h3>$1</h3>')
+            .replace(/\n/g, '<br>');
+    }
+    
+    function init() {
+        renderTestsList();
+        updateGlobalStats();
+        
+        document.getElementById('addTestBtn').addEventListener('click', addTestFromFile);
+        document.getElementById('backupBtn').addEventListener('click', exportStats);
+        document.getElementById('restoreBtn').addEventListener('click', importStats);
+        document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+        const pdfBtn = document.getElementById('pdfPrintBtn');
+        if (pdfBtn) {
+            pdfBtn.addEventListener('click', printToPDF);
+        }
+        document.getElementById('backToListBtn').addEventListener('click', exitTestMode);
+        document.getElementById('checkTestBtn').addEventListener('click', checkTest);
+        document.getElementById('applyQuantityBtn').addEventListener('click', applyQuantityChange);
+                // Кнопка активации AI
+        document.getElementById('aiActivateBtn').addEventListener('click', () => {
+            if (currentTest) {
+                initAIContext(currentTest);
+                showToast('🤖 AI активирован! Теперь нажимай +AI у любого вопроса');
+                document.getElementById('aiActivateBtn').style.background = '#6c4a8f';
+                document.getElementById('aiActivateBtn').innerHTML = '✅ AI активен';
+            } else {
+                alert('Сначала открой тест');
+            }
+        });
+
+        const installed = getInstalledTests();
+        if (installed.length === 0) {
+            const demoTest = {
+                meta: {
+                    id: "demo_cats_001",
+                    name: "🐱 Всё о котиках (демо)",
+                    description: "Пример теста. Установите свои тесты в формате .qt",
+                    icon: "🐱",
+                    version: "1.0"
+                },
+                questions: [
+                    { text: "Сколько жизней у кошки по легенде?", options: ["7", "9", "5", "12"], correct: 1, level: 1 },
+                    { text: "Что делает кошка, когда ей хорошо?", options: ["Шипит", "Мурлычет", "Царапается", "Молчит"], correct: 1, level: 1 },
+                    { text: "Какой цвет глаз чаще всего встречается у белых кошек?", options: ["Голубой", "Зелёный", "Карий", "Жёлтый"], correct: 0, level: 2 },
+                    { text: "Какая порода кошек считается самой крупной?", options: ["Мейн-кун", "Сфинкс", "Британская", "Сиамская"], correct: 0, level: 2 }
+                ]
+            };
+            installTest(demoTest);
+        }
+    }
+    
+    init();
+</script>
+</body>
+<!-- Кнопка для ввода API ключа DeepSeek -->
+<div style="position: fixed; bottom: 20px; right: 20px; z-index: 999;">
+    <button id="deepseekKeyBtn" style="background:#1a3a4a; border-radius: 50px; padding: 10px 16px; font-size: 0.8rem;">
+        🔑 DeepSeek API
+    </button>
+</div>
+
+<script>
+// Диалог для ввода API ключа
+function setupDeepSeekKey() {
+    const savedKey = localStorage.getItem('deepseek_api_key');
+    if (savedKey) {
+        window.DEEPSEEK_API_KEY = savedKey;
+        console.log('✅ DeepSeek API ключ загружен');
+    }
+    
+    const btn = document.getElementById('deepseekKeyBtn');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const key = prompt('🔑 Введите API ключ DeepSeek:\n(Получить можно на platform.deepseek.com)', window.DEEPSEEK_API_KEY || '');
+            if (key && key.trim()) {
+                window.DEEPSEEK_API_KEY = key.trim();
+                localStorage.setItem('deepseek_api_key', key.trim());
+                showToast('✅ API ключ сохранен! Теперь AI отвечает через DeepSeek');
+            } else if (key === '') {
+                window.DEEPSEEK_API_KEY = null;
+                localStorage.removeItem('deepseek_api_key');
+                showToast('🗑️ API ключ удален, AI работает в режиме заглушки');
+            }
+        });
+    }
+}
+
+// Запускаем настройку после загрузки страницы
+setTimeout(setupDeepSeekKey, 100);
+</script>
+</html>
